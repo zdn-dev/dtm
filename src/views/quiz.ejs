@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="./sryle.css" />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      .container {
+        max-width: 1440px;
+        padding-left: 20px;
+        padding-right: 20px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      body {
+        font-family: Arial, sans-serif;
+        font-size: 18px;
+        line-height: 1.5;
+        color: rgb(0, 0, 0);
+      }
+      li {
+        list-style: none;
+      }
+      a {
+        text-decoration: none;
+        color: rgb(0, 0, 0);
+      }
+      .question {
+        font-weight: 600;
+      }
+      .answers {
+        margin-bottom: 20px;
+        display: flex;
+        flex-direction: column;
+      }
+      #submit {
+        font-family: sans-serif;
+        font-size: 20px;
+        background-color: #297;
+        color: #fff;
+        border: 0px;
+        border-radius: 3px;
+        padding: 20px;
+        cursor: pointer;
+        margin-bottom: 20px;
+      }
+      #submit:hover {
+        background-color: #3a8;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="wrapper">
+      <div class="container">
+        <div class="inner">
+          <div id="quiz"></div>
+          <form action="/rewards" method="post" 
+          enctype="application/x-www-form-urlencoded">
+            <input type="hidden" name="result" id="res" />
+            <button type="submit" id="submit">Get Results</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <input type="hidden" id="apu" value="<%= JSON.stringify(FirstQuizs) %>"></input>
+    <input type="hidden" id="api" value="<%= JSON.stringify(SecondQuizs) %>"></input>
+
+    <script>
+      var quizContainer = document.getElementById("quiz");
+      var submitButton = document.getElementById("submit");
+      var res = document.getElementById("res");
+      var apu = document.getElementById("apu");
+      var api = document.getElementById("api");
+
+      var myQuizs = JSON.parse(apu.value)
+      var myQuizs2 = JSON.parse(api.value)
+
+      let allQuizs = myQuizs.concat(myQuizs2);
+
+      generateQuiz(allQuizs, quizContainer, submitButton);
+
+      function generateQuiz(questions, quizContainer, submitButton) {
+        function showQuestions(questions, quizContainer) {
+          var output = [];
+          var answers;
+
+          for (var i = 0; i < questions.length; i++) {
+            answers = [];
+
+            for (letter in questions[i].answers) {
+              answers.push(
+                "<label>" +
+                  '<input type="radio" name="question' +
+                  i +
+                  '" value="' +
+                  letter +
+                  '">' +
+                  letter +
+                  ": " +
+                  questions[i].answers[letter] +
+                  "</label>"
+              );
+            }
+
+            output.push(
+              '<div class="question">' +
+                questions[i].question +
+                "</div>" +
+                '<div class="answers">' +
+                answers.join("") +
+                "</div>"
+            );
+          }
+          quizContainer.innerHTML = output.join("");
+        }
+
+        function showResults(questions, quizContainer) {
+          var answerContainers = quizContainer.querySelectorAll(".answers");
+
+          var userAnswer = "";
+          var numCorrect = 0;
+
+          for (var i = 0; i < questions.length; i++) {
+            userAnswer = (
+              answerContainers[i].querySelector(
+                "input[name=question" + i + "]:checked"
+              ) || {}
+            ).value;
+
+            if (userAnswer == questions[i].correctanswer) {
+              numCorrect++;
+              res.value = numCorrect;
+            }
+          }
+        }
+
+        showQuestions(questions, quizContainer);
+
+        submitButton.onclick = function () {
+          showResults(questions, quizContainer);
+        };
+      }
+    </script>
+  </body>
+</html>
